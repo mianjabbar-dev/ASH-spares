@@ -100,10 +100,12 @@ export default function CheckoutPage() {
     });
 
     if (res.ok) {
+      const responseData = await res.json(); // Order ki details API se wapas lena
       setStatus("✅ Order Placed Successfully!");
-      localStorage.removeItem("ash_spares_cart"); // Live website par order ke baad cart clear karna zaroori hai
+      localStorage.removeItem("ash_spares_cart"); 
       setTimeout(() => {
-        router.push("/order-confirmation");
+        // URL mein orderId bhej rahe hain taake confirmation page usay catch kar sake
+        router.push(`/order-confirmation?orderId=${responseData.orderId}`);
       }, 1500);
     } else {
       setStatus("❌ Order place karne mein masla aaya.");
