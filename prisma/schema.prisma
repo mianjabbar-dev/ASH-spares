@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BusinessSettings {
+  id                   String   @id @default(cuid())
+  businessName         String   @default("ASH Spares")
+  logoUrl              String?
+  email                String   @default("team.ashspare@gmail.com")
+  phone                String   @default("+92-304-7084692")
+  whatsapp             String   @default("+92-304-7084692")
+  instagram            String   @default("https://www.instagram.com/ash.spares/")
+  facebook             String?
+  linkedIn             String?
+  ceoName              String   @default("MIAN JABBAR")
+  ceoLinkedInUrl1      String   @default("https://www.linkedin.com/in/mian-jabbar-dev/")
+  ceoLinkedInUrl2      String   @default("[LINKEDIN URL]")
+  address              String   @default("Faisalabad, Punjab, Pakistan")
+  city                 String   @default("Faisalabad")
+  country              String   @default("Pakistan")
+  importSource         String   @default("Dubai, UAE")
+  aboutText            String?  @db.Text
+  maintenanceMode      Boolean  @default(false)
+  currency             String   @default("PKR")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Supplier {
+  id             String            @id @default(cuid())
+  name           String
+  companyName    String?
+  phone          String?
+  whatsapp       String?
+  email          String?
+  address        String?
+  city           String?
+  country        String            @default("Pakistan")
+  supplierType   SupplierType      @default(WHOLESALER)
+  products       SupplierProduct[]
+  notes          String?           @db.Text
+  paymentTerms   String?
+  status         SupplierStatus    @default(ACTIVE)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+enum SupplierType {
+  MANUFACTURER
+  IMPORTER
+  WHOLESALER
+  DISTRIBUTOR
+  DEALER
+}
+
+enum SupplierStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Product {
+  id              String            @id @default(cuid())
+  name            String
+  sku             String            @unique
+  categoryId      String
+  category        Category          @relation(fields: [categoryId], references: [id])
+  brand           String?
+  vehicle         String?
+  description     String?           @db.Text
+  imageUrl        String?
+  price           Decimal           @db.Decimal(10, 2)
+  discountPrice   Decimal?          @db.Decimal(10, 2)
+  stock           Int               @default(0)
+  featured        Boolean           @default(false)
+  active          Boolean           @default(true)
+  orderItems      OrderItem[]
+  supplierProducts SupplierProduct[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([categoryId])
+  @@index([active])
+  @@index([featured])
+  @@index([brand])
+  @@index([vehicle])
+}
+
+model SupplierProduct {
+  id            String    @id @default(cuid())
+  supplierId    String
+  supplier      Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplierPrice Decimal?  @db.Decimal(10, 2)
+  supplierSku   String?
+  leadTime      String?
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([supplierId, productId])
+  @@index([supplierId])
+  @@index([productId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  whatsapp  String?
+  email     String?
+  address   String?
+  city      String?
+  area      String?
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  
+}
+
+model DiscountCode {
+  id              String        @id @default(cuid())
+  code            String        @unique
+  type            DiscountType
+  value           Decimal       @db.Decimal(10, 2)
+  minOrderAmount  Decimal?      @db.Decimal(10, 2)
+  maxDiscount     Decimal?      @db.Decimal(10, 2)
+  startDate       DateTime?
+  expiryDate      DateTime?
+  usageLimit      Int?
+  usageCount      Int           @default(0)
+  active          Boolean       @default(true)
+  orders          Order[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+model Order {
+  id             String       @id @default(cuid())
+  orderId        String       @unique
+  customerId     String
+  customer       Customer     @relation(fields: [customerId], references: [id])
+  items          OrderItem[]
+  subtotal       Decimal      @db.Decimal(10, 2)
+  discount       Decimal      @default(0) @db.Decimal(10, 2)
+  discountCode   String?
+  discountCodeId String?
+  discountCodeRel DiscountCode? @relation(fields: [discountCodeId], references: [id])
+  total          Decimal      @db.Decimal(10, 2)
+  status         OrderStatus  @default(PENDING)
+  notes          String?      @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([orderId])
+  @@index([status])
+  @@index([customerId])
+  @@index([discountCodeId])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  sku       String
+  price     Decimal @db.Decimal(10, 2)
+  quantity  Int
+  total     Decimal @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([productId])
+}
