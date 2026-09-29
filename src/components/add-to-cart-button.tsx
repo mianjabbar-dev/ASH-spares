@@ -29,7 +29,10 @@ export function AddToCartButton({ product }: { product: any }) {
 
     // Wapas cart update karna
     localStorage.setItem('ash_spares_cart', JSON.stringify(existingCart));
-    
+    localStorage.setItem('ash_spares_cart', JSON.stringify(existingCart));
+
+     // Yeh nayi line add karein:
+     window.dispatchEvent(new Event("cartUpdated"));
     alert(`${product.name} cart mein add ho gaya hai!`);
     setIsAdding(false);
   };

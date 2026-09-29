@@ -27,6 +27,10 @@ export function ProductCard({ product }: { product: any }) {
 
     // Naya data wapas save karna
     localStorage.setItem('ash_spares_cart', JSON.stringify(existingCart));
+    localStorage.setItem('ash_spares_cart', JSON.stringify(existingCart));
+
+     // Yeh nayi line add karein:
+     window.dispatchEvent(new Event("cartUpdated"));
     alert(`${product.name} cart mein add ho gaya hai!`);
   };
 
