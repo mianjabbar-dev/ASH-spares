@@ -8,11 +8,7 @@ import { AddToCartButton } from "@/components/add-to-cart-button";
 import { ProductCard } from "@/components/product-card";
 import { ArrowLeft, Check, X, Package } from "lucide-react";
 
-interface ProductPageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   const product = await prisma.product.findUnique({
@@ -38,6 +34,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const discountPrice = product.discountPrice ? Number(product.discountPrice) : null;
   const displayPrice = discountPrice ?? price;
   const inStock = product.stock > 0;
+
+  // FIX: Prisma ke object ko Client Component me bhejne ke liye safe banaya
+  const safeProductForCart = {
+    id: product.id,
+    name: product.name,
+    price: Number(product.price),
+    imageUrl: product.imageUrl,
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -70,7 +74,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div className="flex flex-col">
               <div className="text-xs font-semibold uppercase tracking-widest text-[var(--accent)] mb-2">
-                {product.category.name}
+                {product.category?.name}
               </div>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl mb-3">
                 {product.name}
@@ -101,7 +105,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
 
               {product.description && (
-                <div className="prose dark:prose-invert max-w-none mb-8">
+               <div className="prose dark:prose-invert max-w-none mb-8">
                   <p className="text-[var(--muted-foreground)] leading-relaxed">
                     {product.description}
                   </p>
@@ -109,7 +113,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               )}
 
               <div className="mt-auto">
-                <AddToCartButton product={product} />
+                <AddToCartButton product={safeProductForCart} />
               </div>
             </div>
           </div>
@@ -118,9 +122,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <section className="mt-20">
               <h2 className="text-2xl font-bold tracking-tight mb-6">Related Products</h2>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {relatedProducts.map((p) => (
-                  <ProductCard key={p.id} product={p} />
-                ))}
+                {relatedProducts.map((p) => {
+                  // FIX: Related products ke liye bhi safe object banaya
+                  const safeRelatedProduct = {
+                    ...p,
+                    price: Number(p.price)
+                  };
+                  return <ProductCard key={p.id} product={safeRelatedProduct} />;
+                })}
               </div>
             </section>
           )}

@@ -188,9 +188,14 @@ export default async function HomePage() {
             </div>
             {featuredProducts.length > 0 ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {featuredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+                {featuredProducts.map((product) => {
+                  // FIX: Decimal error solved for Client Component
+                  const safeProduct = {
+                    ...product,
+                    price: Number(product.price)
+                  };
+                  return <ProductCard key={product.id} product={safeProduct} />;
+                })}
               </div>
             ) : (
               <p className="text-center text-[var(--muted-foreground)]">No featured products yet.</p>
