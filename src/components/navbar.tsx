@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, ShoppingCart, Wrench, User } from "lucide-react";
+import { Menu, X, ShoppingCart, User } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { useCart } from "@/lib/cart-context";
 
@@ -21,13 +22,17 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
+          
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[var(--foreground)] text-[var(--background)]">
-              <Wrench className="h-5 w-5" />
-            </div>
-            <span className="text-lg font-bold tracking-tight uppercase">
-              ASH Spares
-            </span>
+            {/* Wrench aur text hata kar aapka logo add kar diya gaya hai */}
+            <Image 
+              src="/logo.svg" 
+              alt="ASH Spares" 
+              width={140} 
+              height={45} 
+              className="object-contain"
+              priority
+            />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
