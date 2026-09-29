@@ -5,7 +5,7 @@ import { ShoppingCart } from "lucide-react";
 
 export function ProductCard({ product }: { product: any }) {
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Is se button click hone par page redirect nahi hoga
+    e.preventDefault(); // Page reload hone se rokne ke liye
     
     const cartItem = {
       productId: product.id,
@@ -15,25 +15,19 @@ export function ProductCard({ product }: { product: any }) {
       imageUrl: product.imageUrl
     };
 
-    // Purana cart check karein
+    // LocalStorage se live cart fetch karna
     const existingCart = JSON.parse(localStorage.getItem('ash_spares_cart') || '[]');
-
-    // Check karein ke product pehle se cart mein toh nahi
     const existingItemIndex = existingCart.findIndex((item: any) => item.productId === product.id);
 
     if (existingItemIndex > -1) {
-      // Agar pehle se hai, toh quantity barha dein
       existingCart[existingItemIndex].quantity += 1;
     } else {
-      // Agar naya hai, toh cart mein daal dein
       existingCart.push(cartItem);
     }
 
-    // Wapas save karein
+    // Naya data wapas save karna
     localStorage.setItem('ash_spares_cart', JSON.stringify(existingCart));
-    
-    // User ko message show karein
-    alert(`${product.name} successfully cart mein add ho gaya hai!`);
+    alert(`${product.name} cart mein add ho gaya hai!`);
   };
 
   return (
@@ -44,6 +38,7 @@ export function ProductCard({ product }: { product: any }) {
             src={product.imageUrl}
             alt={product.name}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
